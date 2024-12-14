@@ -1,0 +1,63 @@
+@use "./variables.module.scss";
+@use "./mixin.scss";
+@use "./base.scss";
+
+/* 公共样式 ------------------------------- */
+#app {
+  height: 100%;
+}
+
+/* flex ------------------------------- */
+.f-c-c {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.f-c-b {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.f-s-s {
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-start;
+}
+.f-c-s {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+}
+.f-c-e {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+/* 外边距、内边距全局样 ------------------------------- */
+@for $i from 5 through 35 {
+  .mt#{$i} {
+    margin-top: #{$i}px !important;
+  }
+  .mr#{$i} {
+    margin-right: #{$i}px !important;
+  }
+  .mb#{$i} {
+    margin-bottom: #{$i}px !important;
+  }
+  .ml#{$i} {
+    margin-left: #{$i}px !important;
+  }
+  .pt#{$i} {
+    padding-top: #{$i}px !important;
+  }
+  .pr#{$i} {
+    padding-right: #{$i}px !important;
+  }
+  .pb#{$i} {
+    padding-bottom: #{$i}px !important;
+  }
+  .pl#{$i} {
+    padding-left: #{$i}px !important;
+  }
+}
