@@ -22,9 +22,6 @@ import Silder from "../components/Slider";
 
 const isMobile = ref(false);
 onMounted(() => {
-  if (window.innerWidth == 768) {
-    console.log("object");
-  }
   isMobile.value = window.innerWidth <= 768; // 判断是否为移动端
 });
 </script>

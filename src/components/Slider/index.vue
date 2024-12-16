@@ -15,10 +15,11 @@
 
 <script setup>
 import myRouter from "@/router/index.js";
-import { useRoute } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 import { onMounted } from "vue";
 
 const route = useRoute();
+const router = useRouter();
 
 const { routes } = myRouter.options;
 const menus = ref([]);
@@ -34,7 +35,7 @@ const handleClose = (key, keyPath) => {
 onMounted(() => {
   const { path } = route;
   menus.value = routes.filter((item) => item.name == "Layout")[0].children;
-  active.value = path;
+  active.value = path === "/" ? router.push("/index") : path;
 });
 </script>
 

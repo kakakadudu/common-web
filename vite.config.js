@@ -53,7 +53,7 @@ export default defineConfig(({ mode, command }) => {
       open: true,
       proxy: {
         [VITE_APP_BASE_API]: {
-          target: "",
+          target: "http://192.168.52.5:20001",
           changeOrigin: true,
           rewrite: (p) => p.replace(/^\/dev-api/, ""),
         },

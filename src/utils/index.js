@@ -98,3 +98,33 @@ export function pickerOptions(options = { key: null, filters: [] }) {
   });
   return shortcuts;
 }
+
+
+// 读取文件信息宽高
+export function fileInfo(file) {
+  return new Promise((resolve,reject) => {
+       const reader = new FileReader();
+       reader.onload = function (e) {
+            const dataURL = e.target.result;
+            // 创建一个 Image 对象
+            const img = new Image();
+            // 当图片加载完成时，获取图片的宽度和高度
+            img.onload = function () {
+                 const width = this.width;
+                 const height = this.height;
+                 resolve({ width, height });
+            };
+            // 设置图片的 src 为数据 URL
+            img.src = dataURL;
+       };
+       // 读取文件
+       reader.readAsDataURL(file);
+  });
+}
+
+// 计算等比高度
+export function getEqualHeight(width, height) {
+  const num = (width / 720).toFixed(2);
+  const eqHeight = parseInt(height / Number(num));
+  return eqHeight;
+}

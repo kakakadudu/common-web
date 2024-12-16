@@ -8,7 +8,7 @@ import { getToken } from "@/utils/auth";
 import errorCode from "@/utils/errorCode";
 import { tansParams } from "@/utils/common";
 import cache from "@/plugins/cache";
-import useUserStore from "@/store/modules/user";
+import useUserStore from "@/stores/modules/user";
 // 是否显示重新登录
 export let isRelogin = { show: false };
 

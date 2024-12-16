@@ -34,3 +34,12 @@ export function logout() {
     method: "post",
   });
 }
+
+// 获取火山云 token
+export function getHsyToken(query) {
+  return request({
+    url: '/sign/token',
+    method: 'get',
+    params: query,
+  });
+}
