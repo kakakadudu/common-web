@@ -7,24 +7,27 @@ const router = createRouter({
   routes: [
     {
       path: "",
-      name: "",
+      name: "Layout",
       component: Layout,
       children: [
         {
-          path: "/",
+          path: "/index",
           name: "Index",
+          title: "作品管理",
+          icon: "Collection",
           component: Index,
-        },
+        }, 
       ],
     },
-    // {
-    //   path: "/about",
-    //   name: "about",
-    //   // route level code-splitting
-    //   // this generates a separate chunk (About.[hash].js) for this route
-    //   // which is lazy-loaded when the route is visited.
-    //   component: () => import("../views/AboutView.vue"),
-    // },
+    {
+      path: "/init",
+      name: "Init",
+      desc: "首次登录初始化信息",
+      // route level code-splitting
+      // this generates a separate chunk (About.[hash].js) for this route
+      // which is lazy-loaded when the route is visited.
+      component: () => import("../views/initInfo/index.vue"),
+    },
   ],
 });
 

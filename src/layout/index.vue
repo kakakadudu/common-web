@@ -1,14 +1,13 @@
 <template>
   <el-container>
-    <el-header>
-      <div class="item">Gmail</div>
-      <div class="item">图片</div>
-    </el-header>
+    <el-header class="f-c-c"><Header /></el-header>
     <el-main>
-      <div class="main f-c-c">
-        <div class="warp f-s-s mt30">
-          <div v-if="!isMobile" class="silder"></div>
-          <div class="content">
+      <div class="app-main f-c-c">
+        <div class="app-warp f-s-s mt30">
+          <div v-if="!isMobile" class="silder">
+            <Silder />
+          </div>
+          <div class="app-container">
             <router-view></router-view>
           </div>
         </div>
@@ -18,8 +17,14 @@
 </template>
 <script setup>
 import { onMounted, ref } from "vue";
+import Header from "../components/Header";
+import Silder from "../components/Slider";
+
 const isMobile = ref(false);
 onMounted(() => {
+  if (window.innerWidth == 768) {
+    console.log("object");
+  }
   isMobile.value = window.innerWidth <= 768; // 判断是否为移动端
 });
 </script>
@@ -41,23 +46,23 @@ onMounted(() => {
   top: 30px;
   z-index: 10;
   width: 200px;
-  min-height: 300px;
+  min-height: 100px;
   background-color: #fff;
   margin-right: 10px;
 }
-.content {
+.app-container {
   flex: 1;
   min-height: 600px;
   background-color: #fff;
 }
 @media screen and (min-width: 769px) {
-  .warp {
+  .app-warp {
     width: 1200px;
   }
 }
 // 移动端
 @media screen and (max-width: 768px) {
-  .warp {
+  .app-warp {
     width: 100%;
   }
 }
