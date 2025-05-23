@@ -1,7 +1,6 @@
 import axios from "axios";
 import {
   ElNotification,
-  ElMessageBox,
   ElMessage,
 } from "element-plus";
 import { getToken } from "@/utils/auth";
@@ -9,10 +8,10 @@ import errorCode from "@/utils/errorCode";
 import { tansParams } from "@/utils/common";
 import cache from "@/plugins/cache";
 import useUserStore from "@/stores/modules/user";
-// 是否显示重新登录
-export let isRelogin = { show: false };
 
-axios.defaults.headers["Content-Type"] = "application/json;charset=utf-8";
+let isRefreshing = false; // 标志位，表示是否正在刷新 Token
+let refreshSubscribers = []; // 存储等待刷新 Token 的请求
+
 // 创建axios实例
 const service = axios.create({
   // axios中请求配置有baseURL选项，表示请求URL公共部分
@@ -61,7 +60,7 @@ service.interceptors.request.use(
       if (requestSize >= limitSize) {
         console.warn(
           `[${config.url}]: ` +
-            "请求数据大小超出允许的5M限制，无法进行防重复提交验证。"
+          "请求数据大小超出允许的5M限制，无法进行防重复提交验证。"
         );
         return config;
       }
@@ -93,7 +92,7 @@ service.interceptors.request.use(
     return config;
   },
   (error) => {
-    console.log(error);
+    console.log("request error-----", error);
     Promise.reject(error);
   }
 );
@@ -113,30 +112,37 @@ service.interceptors.response.use(
       return res.data;
     }
     if (code === 401) {
-      if (!isRelogin.show) {
-        isRelogin.show = true;
-        ElMessageBox.confirm(
-          "登录状态已过期，您可以继续留在该页面，或者重新登录",
-          "系统提示",
-          {
-            confirmButtonText: "重新登录",
-            cancelButtonText: "取消",
-            type: "warning",
-          }
-        )
-          .then(() => {
-            isRelogin.show = false;
-            useUserStore()
-              .logOut()
-              .then(() => {
-                location.href = "/";
-              });
-          })
-          .catch(() => {
-            isRelogin.show = false;
+      const originalRequest = res.config; // 保存当前请求
+      if (!isRefreshing) {
+        isRefreshing = true;
+        return useUserStore().refreshAccessToken().then((res) => { // 刷新 Token 成功，重新发送原始请求
+          originalRequest.headers["Authorization"] = "Bearer " + getToken();
+          // 重新发送原始请求
+          retryRefreshSubscribers()
+          return service(originalRequest);
+        }).catch((refreshError) => {
+          // 刷新 Token 失败，跳转到登录页面
+          // ElMessage({ message: "登录过期，请重新登录", type: "error" });
+          useUserStore().logOut();
+          return Promise.reject(refreshError);
+        }).finally(() => {
+          isRefreshing = false;
+        });
+      } else {
+        console.log(originalRequest.url, "正在刷新 Token，将请求加入等待队列");
+        // 如果正在刷新 Token，将请求加入等待队列
+        return new Promise((resolve) => {
+          refreshSubscribers.push(() => {
+            originalRequest.headers["Authorization"] = "Bearer " + getToken();
+            resolve(service(originalRequest));
           });
+        });
       }
-      return Promise.reject("无效的会话，或者会话已过期，请重新登录。");
+    } else if (code === 403) {
+      // ElMessage({ message: "登录过期，请重新登录", type: "error" });
+      console.log("登录过期");
+      useUserStore().logOut();
+      return Promise.reject(res);
     } else if (code === 500) {
       ElMessage({ message: msg, type: "error" });
       return Promise.reject(new Error(msg));
@@ -151,7 +157,7 @@ service.interceptors.response.use(
     }
   },
   (error) => {
-    console.log("err" + error);
+    console.log("response error-----", error);
     let { message } = error;
     if (message == "Network Error") {
       message = "后端接口连接异常";
@@ -170,6 +176,11 @@ service.interceptors.response.use(
     return Promise.reject(error);
   }
 );
+// 刷新 Token 成功后，重新发送所有等待的请求
+const retryRefreshSubscribers = () => {
+  refreshSubscribers.forEach((callback) => callback());
+  refreshSubscribers = [];
+};
 
 export function cancelRequests() {
   cancelRequest.forEach((c) => c());

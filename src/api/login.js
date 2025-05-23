@@ -43,3 +43,12 @@ export function getHsyToken(query) {
     params: query,
   });
 }
+
+// 刷新token
+export function refreshToken(data) {
+  return request({
+    url: '/web/auth/refresh_token',
+    method: 'post',
+    params: data
+  });
+}

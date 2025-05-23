@@ -1,4 +1,6 @@
 import { createRouter, createWebHistory } from "vue-router";
+import { getToken } from "@/utils/auth";
+import { getAuth } from "@/api/user.js";
 import Layout from "../layout/index.vue";
 import Index from "../views/index/index.vue";
 
@@ -16,7 +18,7 @@ const router = createRouter({
           title: "作品管理",
           icon: "Collection",
           component: Index,
-        }, 
+        },
       ],
     },
     {
@@ -29,6 +31,38 @@ const router = createRouter({
       component: () => import("../views/initInfo/index.vue"),
     },
   ],
+});
+const toPage = (next) => {
+  if (window.localStorage.getItem("hadAuth") === "1") {
+    next();
+  } else {
+    if (getToken()) {
+      router.replace({ path: "/init" });
+    } else {
+      useUserStore().logOut();
+    }
+  }
+};
+
+router.beforeEach((to, from, next) => {
+  if (to.fullPath === "/") {
+    router.replace({ path: "/index" });
+  }
+  if (!!to.meta.hadAuth) {
+    // 需要认证才可访问
+    if (window.localStorage.getItem("hadAuth")) {
+      toPage(next);
+    } else {
+      getAuth().then((res) => {
+        if (res.data?.name) {
+          window.localStorage.setItem("hadAuth", 1);
+        }
+        toPage(next);
+      });
+    }
+  } else {
+    next();
+  }
 });
 
 export default router;

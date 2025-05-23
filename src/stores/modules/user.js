@@ -1,11 +1,12 @@
 import { defineStore } from "pinia";
-import { login, logout, getInfo } from "@/api/login";
-import { getToken, setToken, removeToken } from "@/utils/auth";
+import { login, logout, getInfo, refreshToken } from "@/api/login";
+import { getToken, setToken, removeToken, getRefreshToken, setRefreshToken, removeRefreshToken } from "@/utils/auth";
 import defAva from "@/assets/images/sheep.jpeg";
 
 const useUserStore = defineStore("user", {
   state: () => ({
     token: getToken(),
+    refreshToken: getRefreshToken(), // 用于刷新 accessToken
     id: "",
     name: "",
     avatar: "",
@@ -46,6 +47,28 @@ const useUserStore = defineStore("user", {
             resolve(res);
           })
           .catch((error) => {
+            reject(error);
+          });
+      });
+    },
+    refreshAccessToken() {
+      return new Promise((resolve, reject) => {
+        refreshToken({
+          refreshToken: this.refreshToken
+        })
+          .then((res) => {
+            if (res.code === 200) {
+              setToken(res.data.accessToken);
+              setRefreshToken(res.data.refreshToken);
+              this.token = res.data.accessToken;
+              this.refreshToken = res.data.refreshToken;
+              resolve(res);
+            } else {
+              reject(res);
+            }
+          })
+          .catch((error) => {
+            this.logOut();
             reject(error);
           });
       });
